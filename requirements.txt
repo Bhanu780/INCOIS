@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-dotenv
+httpx
+xarray
+netCDF4
+numpy
+copernicusmarine

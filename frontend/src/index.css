@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* ── Custom Design Tokens ─────────────────────────────────────────────── */
+@theme {
+  --color-ocean-900: #0a0e1a;
+  --color-ocean-800: #0f1629;
+  --color-ocean-700: #151e38;
+  --color-ocean-600: #1b2747;
+  --color-ocean-500: #243456;
+  --color-ocean-400: #3a5080;
+  --color-ocean-300: #5a7aad;
+  --color-ocean-200: #8aaad4;
+  --color-ocean-100: #b8d4f0;
+  --color-accent-cyan: #22d3ee;
+  --color-accent-teal: #2dd4bf;
+  --color-accent-blue: #60a5fa;
+  --color-sidebar-w: 300px;
+  --color-navbar-h: 56px;
+}
+
+/* ── Global resets ────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--color-ocean-900);
+  color: #e2e8f0;
+}
+
+/* ── Scrollbar styling ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ocean-500);
+  border-radius: 3px;
+}
