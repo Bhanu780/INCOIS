@@ -1,8 +1,9 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import GRID_DEPTHS_M, GRID_REFRESH_INTERVAL_SECONDS, GRID_STEP_DEG, REGION_BOUNDS
@@ -28,7 +29,7 @@ async def lifespan(app: FastAPI):
         task.cancel()
 
 
-app = FastAPI(title="3D Ocean API", lifespan=lifespan)
+app = FastAPI(title="Apna Sagar API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -50,10 +51,32 @@ async def health_check():
 
 
 @app.get("/api/argo-floats")
-async def get_argo_floats(days_back: int = 30, refresh: bool = False):
-    """Real, currently-reporting Argo floats in the region, from Argovis."""
+async def get_argo_floats(
+    days_back: int = 30,
+    refresh: bool = False,
+    min_lon: Optional[float] = Query(None),
+    max_lon: Optional[float] = Query(None),
+    min_lat: Optional[float] = Query(None),
+    max_lat: Optional[float] = Query(None),
+):
+    """Real, currently-reporting Argo floats in the region, from Argovis.
+    Optional bbox params (min_lon, max_lon, min_lat, max_lat) filter results
+    to a specific ocean region.
+    """
     try:
-        return await argovis_client.fetch_active_floats(days_back=days_back, force_refresh=refresh)
+        floats = await argovis_client.fetch_active_floats(days_back=days_back, force_refresh=refresh)
+        # Apply bounding-box filter when a region is selected
+        if all(v is not None for v in [min_lon, max_lon, min_lat, max_lat]):
+            floats = [
+                f for f in floats
+                if min_lat <= f.get("lat", 0) <= max_lat
+                and min_lon <= f.get("lon", 0) <= max_lon
+            ]
+            logger.info(
+                f"Bbox filter applied: lon=[{min_lon},{max_lon}] lat=[{min_lat},{max_lat}] "
+                f"→ {len(floats)} floats returned"
+            )
+        return floats
     except Exception as exc:
         logger.exception("Argovis float list fetch failed")
         raise HTTPException(status_code=502, detail=f"Could not reach Argovis: {exc}")

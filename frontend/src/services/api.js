@@ -22,7 +22,17 @@ export const fetchStatus = () => apiFetch('/');
 // ── Ocean Grid ────────────────────────────────────────────────────────────
 
 /** Full 3-D grid (all depths, all variables) */
-export const fetchOceanGrid = () => apiFetch('/api/ocean-grid');
+export const fetchOceanGrid = (bbox = null) => {
+  const params = new URLSearchParams();
+  if (bbox) {
+    params.set('min_lon', bbox.minLon);
+    params.set('max_lon', bbox.maxLon);
+    params.set('min_lat', bbox.minLat);
+    params.set('max_lat', bbox.maxLat);
+  }
+  const qs = params.toString();
+  return apiFetch(`/api/ocean-grid${qs ? `?${qs}` : ''}`);
+};
 
 /** Single depth-slice for a specific variable */
 export const fetchDepthSlice = (depth, variable = 'temperature') =>
@@ -52,9 +62,16 @@ export const fetchIsosurface = (variable, isoLevel) =>
 // ── Instruments ───────────────────────────────────────────────────────────
 
 /** Active Argo float positions */
-export const fetchArgoFloats = (daysBack = 30, refresh = false) =>
-  apiFetch(`/api/argo-floats?days_back=${daysBack}&refresh=${refresh}`);
-
+export const fetchArgoFloats = (daysBack = 30, refresh = false, bbox = null) => {
+  const params = new URLSearchParams({ days_back: daysBack, refresh });
+  if (bbox) {
+    params.set('min_lon', bbox.minLon);
+    params.set('max_lon', bbox.maxLon);
+    params.set('min_lat', bbox.minLat);
+    params.set('max_lat', bbox.maxLat);
+  }
+  return apiFetch(`/api/argo-floats?${params.toString()}`);
+};
 /** Depth-profile for a specific Argo float */
 export const fetchFloatProfile = (floatId) =>
   apiFetch(`/api/float-profile/${encodeURIComponent(floatId)}`);

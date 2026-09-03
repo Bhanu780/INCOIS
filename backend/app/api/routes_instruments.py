@@ -28,13 +28,25 @@ from backend.app.ingestion.registry import get_parser
 async def get_argo_floats(
     days_back: int = Query(30, description="How many days back to search for active floats"),
     refresh: bool = Query(False, description="Force a fresh download from Argovis"),
+    min_lon: Optional[float] = Query(None, description="Bounding box min longitude"),
+    max_lon: Optional[float] = Query(None, description="Bounding box max longitude"),
+    min_lat: Optional[float] = Query(None, description="Bounding box min latitude"),
+    max_lat: Optional[float] = Query(None, description="Bounding box max latitude"),
 ):
     """
     Returns real, currently-reporting Argo float positions and metadata
     from the Argovis API.  Cached to avoid hammering the upstream server.
+    Optional bbox params filter results to a named ocean region.
     """
     try:
-        return await _argovis.fetch_active_floats(days_back=days_back, force_refresh=refresh)
+        # Build bbox dict when all four params are supplied
+        bbox = None
+        if all(v is not None for v in [min_lon, max_lon, min_lat, max_lat]):
+            bbox = {"min_lon": min_lon, "max_lon": max_lon, "min_lat": min_lat, "max_lat": max_lat}
+
+        # Pass bbox into fetch so Argovis is queried with the correct region box
+        floats = await _argovis.fetch_active_floats(days_back=days_back, force_refresh=refresh, bbox=bbox)
+        return floats
     except Exception as exc:
         logger.exception("Argovis float list fetch failed")
         raise HTTPException(status_code=502, detail=f"Could not reach Argovis: {exc}")

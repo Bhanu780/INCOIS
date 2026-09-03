@@ -42,18 +42,31 @@ def _require_cache():
 # ── Endpoints ─────────────────────────────────────────────────────────────
 
 @router.get("", summary="Full 3D ocean grid (all depths)")
-async def get_ocean_grid():
+async def get_ocean_grid(
+    min_lon: Optional[float] = Query(None, description="Bounding box min longitude"),
+    max_lon: Optional[float] = Query(None, description="Bounding box max longitude"),
+    min_lat: Optional[float] = Query(None, description="Bounding box min latitude"),
+    max_lat: Optional[float] = Query(None, description="Bounding box max latitude"),
+):
     """
     Real gridded temperature/salinity/currents sampled from CMEMS/NetCDF.
 
     Returns a list of {lat, lon, depth, temp, salinity, currents} objects
-    covering the configured region at all depth levels.
+    covering the configured region (or the requested bbox) at all depth levels.
     """
     _require_cache()
     lats = list(range(REGION_BOUNDS["min_lat"], REGION_BOUNDS["max_lat"] + 1, GRID_STEP_DEG))
     lons = list(range(REGION_BOUNDS["min_lon"], REGION_BOUNDS["max_lon"] + 1, GRID_STEP_DEG))
     try:
-        return _cmems.sample_grid(lats, lons, GRID_DEPTHS_M)
+        points = _cmems.sample_grid(lats, lons, GRID_DEPTHS_M)
+        # Apply optional bbox filter when a non-global region is selected
+        if all(v is not None for v in [min_lon, max_lon, min_lat, max_lat]):
+            points = [
+                p for p in points
+                if min_lat <= p.get("lat", 0) <= max_lat
+                and min_lon <= p.get("lon", 0) <= max_lon
+            ]
+        return points
     except Exception as exc:
         logger.exception("Ocean grid sampling failed")
         raise HTTPException(status_code=502, detail=str(exc))

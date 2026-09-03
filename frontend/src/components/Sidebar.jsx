@@ -1,7 +1,7 @@
 import DepthSlider from './DepthSlider';
 import LayerOpacityControl from './LayerOpacityControl';
 import VerticalExaggerationControl from './VerticalExaggerationControl';
-import ColorbarEditor from './ColorbarEditor';
+import RegionSelector from './RegionSelector';
 
 const VARIABLES = ['Temperature', 'Salinity', 'Currents'];
 
@@ -16,6 +16,7 @@ export default function Sidebar({
   colorbarConfig, onColorbarConfigChange,
   floatCount,
   dataSourceStatus,
+  selectedRegion, onRegionChange,
 }) {
   return (
     <aside
@@ -24,7 +25,16 @@ export default function Sidebar({
     >
       <div className="p-5 flex flex-col gap-7">
 
-        {/* ── Variable Selector ──────────────────────────────── */}
+        {/* ── Ocean Region Selector ──────────────────────────── */}
+        <section>
+          <SectionLabel>Ocean Region</SectionLabel>
+          <RegionSelector
+            selectedRegion={selectedRegion}
+            onRegionChange={onRegionChange}
+          />
+        </section>
+
+        {/* ── Variable Selector ─────────────────────────────── */}
         <section>
           <SectionLabel>Variable</SectionLabel>
 
@@ -63,13 +73,6 @@ export default function Sidebar({
             </span>
           </div>
         </section>
-
-        {/* ── Colorbar Editor ─────────────────────────────────── */}
-        <ColorbarEditor
-          variable={variable}
-          colorbarConfig={colorbarConfig}
-          onConfigChange={onColorbarConfigChange}
-        />
 
         {/* ── Render Mode Toggle ─────────────────────────────── */}
         <section>
@@ -232,19 +235,6 @@ export default function Sidebar({
             ) : (
               <p className="text-ocean-500">Loading status...</p>
             )}
-          </div>
-        </section>
-
-        {/* ── Interactive Guide ──────────────────────── */}
-        <section>
-          <SectionLabel>Interactive Guide</SectionLabel>
-          <div className="rounded-xl bg-ocean-700/50 border border-ocean-600/30 p-3.5 text-xs text-ocean-300 space-y-1.5">
-            <p className="text-ocean-200 font-medium">💡 Map Controls:</p>
-            <p>• Drag mouse to rotate 3D Earth</p>
-            <p>• Scroll wheel to zoom in/out</p>
-            <p>• Click any float marker to view profile</p>
-            <p>• Use Volumetric mode for 3D depth column view</p>
-            <p>• Press 🌏 in navbar for guided tour</p>
           </div>
         </section>
       </div>

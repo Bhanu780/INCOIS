@@ -14,8 +14,8 @@ export default function Navbar({ onOutreachClick }) {
         </div>
 
         <h1 className="text-lg font-semibold tracking-wide">
-          <span className="text-accent-cyan">INCOIS</span>{' '}
-          <span className="text-ocean-200">Ocean Data Visualizer</span>
+          <span className="text-accent-cyan">Apna Sagar</span>{' '}
+          <span className="text-ocean-200">3D Ocean Visualizer</span>
         </h1>
       </div>
 
@@ -25,12 +25,15 @@ export default function Navbar({ onOutreachClick }) {
         <button
           id="outreach-mode-btn"
           onClick={onOutreachClick}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg
                      bg-ocean-700/60 border border-ocean-600/40
-                     text-xs text-ocean-200 hover:text-white hover:bg-ocean-700
-                     transition-all hover:border-accent-cyan/30"
+                     text-xs font-medium text-ocean-200 hover:text-white hover:bg-ocean-700
+                     transition-all hover:border-accent-cyan/40 shadow-sm"
         >
-          <span>🌏</span>
+          <svg className="w-4 h-4 text-accent-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
           <span className="hidden sm:inline">Ocean Explorer</span>
         </button>
 

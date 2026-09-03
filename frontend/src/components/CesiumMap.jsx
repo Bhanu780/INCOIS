@@ -94,6 +94,8 @@ export default function CesiumMap({
   renderMode = 'volumetric',
   colorbarConfig,
   currentTime,
+  selectedRegion,
+  regionCesiumView,
 }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
@@ -137,6 +139,26 @@ export default function CesiumMap({
       }
     };
   }, []);
+
+  // ── Fly camera to selected region ───────────────────────────────
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed() || !regionCesiumView) return;
+
+    const { longitude, latitude, height } = regionCesiumView;
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+      orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch:   Cesium.Math.toRadians(-90),
+        roll:    0,
+      },
+      duration: 2.0,
+    });
+  // We intentionally omit regionCesiumView from deps to avoid flying on every render;
+  // selectedRegion is the stable trigger.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRegion]);
 
   // ── Click handler for float markers ──────────────────────────────
   useEffect(() => {

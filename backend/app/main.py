@@ -50,9 +50,9 @@ async def lifespan(app: FastAPI):
 # ── App assembly ──────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="3D Ocean Data Visualization API",
+    title="Apna Sagar — 3D Ocean Data Visualization API",
     description=(
-        "FastAPI backend for the SIH-2026 3D Ocean Visualization platform. "
+        "FastAPI backend for the Apna Sagar 3D Ocean Visualization platform. "
         "Serves CMEMS/NetCDF ocean grids, Argo float profiles, "
         "and OGC WMS/WCS-compatible metadata."
     ),

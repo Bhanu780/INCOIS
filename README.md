@@ -1,44 +1,43 @@
-# 🌊 3D Ocean Data Visualization Platform
+# Apna Sagar — 3D Ocean Data Visualization Platform
 
-> **SIH 2026 — INCOIS Ocean Data Visualization Blueprint**  
-> An interactive, real-time 3D oceanographic visualization system built for the Arabian Sea & Bay of Bengal regions. Integrates live Argo float profiles (Argovis API) and Copernicus Marine Service (CMEMS) 3D gridded physical oceanography data.
+> **Apna Sagar — INCOIS Ocean Data Visualization Platform**  
+> An interactive, real-time 3D oceanographic visualization system built for global & regional ocean data. Integrates live Argo float profiles (Argovis API) and Copernicus Marine Service (CMEMS) 3D gridded physical oceanography data.
 
 ---
 
-## 📌 Table of Contents
-1. [Overview & Key Features](#-overview--key-features)
-2. [Tech Stack](#-tech-stack)
-3. [Prerequisites](#-prerequisites)
-4. [Step-by-Step Local Setup Guide](#-step-by-step-local-setup-guide)
+## Table of Contents
+1. [Overview & Key Features](#overview--key-features)
+2. [Tech Stack](#tech-stack)
+3. [Prerequisites](#prerequisites)
+4. [Step-by-Step Local Setup Guide](#step-by-step-local-setup-guide)
    - [1. Clone Repository](#1-clone-the-repository)
    - [2. Configure Environment Variables](#2-configure-environment-variables)
    - [3. Backend Setup (FastAPI)](#3-backend-setup-fastapi)
    - [4. Frontend Setup (React + Vite + CesiumJS)](#4-frontend-setup-react--vite--cesiumjs)
-5. [Running with Docker Compose](#-running-with-docker-compose)
-6. [API Endpoints Reference](#-api-endpoints-reference)
-7. [Project Structure](#-project-structure)
-8. [Troubleshooting & FAQs](#-troubleshooting--faqs)
+5. [Running with Docker Compose](#running-with-docker-compose)
+6. [API Endpoints Reference](#api-endpoints-reference)
+7. [Project Structure](#project-structure)
+8. [Troubleshooting & FAQs](#troubleshooting--faqs)
 
 ---
 
-## 🌐 Overview & Key Features
+## Overview & Key Features
 
 | Feature | Description |
 |---------|-------------|
-| 🌍 **3D Interactive Globe** | High-performance rendering via CesiumJS with camera controls, tilt, and lighting. |
-| 🌡️ **3D Ocean Grids** | Dynamic volumetric 3D point cloud & column visualizers for Temperature, Salinity, and Currents. |
-| 🔪 **Depth Slice Mode** | Inspect 2D horizontal depth slices at custom depths (e.g., 0m, 100m, 500m, 1000m). |
-| 🛟 **Live Argo Floats** | Fetches live reporting Argo float coordinates and depth profiles via Argovis API. |
-| 📊 **Profile Analysis** | Interactive depth-vs-temperature/salinity graph for individual floats. |
-| 🔺 **3D Isosurface** | Marching Cubes 3D isosurface mesh generation (e.g., 20°C thermocline visualization). |
-| ⏱️ **Time Animation** | Play, pause, and cycle through time steps with adjustable playback speeds. |
-| 🎨 **Colorbar Editor** | Custom color maps (Thermal, Haline, Velocity, Jet, Viridis), logarithmic/linear scaling, and range overrides. |
-| 📢 **Outreach Mode** | Guided educational mode for public exhibitions and non-technical stakeholders. |
-| 📡 **OGC Standards** | WMS/WCS endpoint compatibility with CF-1.8 metadata compliance. |
+| **3D Interactive Globe** | High-performance rendering via CesiumJS with camera controls, tilt, and lighting. |
+| **3D Ocean Grids** | Dynamic volumetric 3D point cloud & column visualizers for Temperature, Salinity, and Currents. |
+| **Depth Slice Mode** | Inspect 2D horizontal depth slices at custom depths (e.g., 0m, 100m, 500m, 1000m). |
+| **Live Argo Floats** | Fetches live reporting Argo float coordinates and depth profiles via Argovis API. |
+| **Profile Analysis** | Interactive depth-vs-temperature/salinity graph for individual floats. |
+| **3D Isosurface** | Marching Cubes 3D isosurface mesh generation (e.g., 20°C thermocline visualization). |
+| **Time Animation** | Play, pause, and cycle through time steps with adjustable playback speeds. |
+| **Outreach Mode** | Guided educational mode for public exhibitions and non-technical stakeholders. |
+| **OGC Standards** | WMS/WCS endpoint compatibility with CF-1.8 metadata compliance. |
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend**: Python 3.11+, FastAPI, Uvicorn, xarray, NetCDF4, Copernicus Marine SDK, HTTPX, Pydantic
 - **Frontend**: React 19, Vite, CesiumJS, TailwindCSS, Recharts
@@ -46,7 +45,7 @@
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before running the application locally, ensure you have the following installed on your machine:
 
@@ -57,7 +56,7 @@ Before running the application locally, ensure you have the following installed 
 
 ---
 
-## 🚀 Step-by-Step Local Setup Guide
+## Step-by-Step Local Setup Guide
 
 ### 1. Clone the Repository
 
@@ -141,7 +140,7 @@ python backend/app/main.py
 - **API Root**: `http://127.0.0.1:8000/`
 - **Interactive Swagger Docs**: `http://127.0.0.1:8000/docs`
 
-> 💡 **Note**: On initial startup, the backend automatically warms up its ocean grid cache from Copernicus Marine or local NetCDF files. This initial fetch takes ~1-2 minutes.
+> **Note**: On initial startup, the backend automatically warms up its ocean grid cache from Copernicus Marine or local NetCDF files. This initial fetch takes ~1-2 minutes.
 
 ---
 
@@ -161,13 +160,13 @@ npm run dev
 ```
 
 The frontend will run at:
-👉 **`http://localhost:5173/`**
+**`http://localhost:5173/`**
 
 Open `http://localhost:5173/` in Google Chrome, Microsoft Edge, or Mozilla Firefox.
 
 ---
 
-## 🐳 Running with Docker Compose
+## Running with Docker Compose
 
 If you prefer running both Frontend and Backend with a single command inside Docker containers:
 
@@ -190,7 +189,7 @@ docker-compose down
 
 ---
 
-## 🔌 API Endpoints Reference
+## API Endpoints Reference
 
 | Category | Method | Endpoint | Description |
 |----------|--------|----------|-------------|
@@ -209,7 +208,7 @@ docker-compose down
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 3d ocean/
@@ -242,11 +241,10 @@ docker-compose down
 │   │   └── components/
 │   │       ├── CesiumMap.jsx          # 3D CesiumJS Globe & render loops
 │   │       ├── FloatProfilePanel.jsx  # Depth profile chart (Recharts)
-│   │       ├── ColorbarEditor.jsx     # Palette & scale control panel
 │   │       ├── TimeSlider.jsx         # Time playback controller
 │   │       ├── DepthSlider.jsx        # Depth level controller
 │   │       ├── LayerOpacityControl.jsx# Grid opacity slider
-│   │       ├── VerticalExaggerationControl.jsx # 3D Depth scaling slider
+            ├── VerticalExaggerationControl.jsx # 3D Depth scaling slider
 │   │       ├── OutreachMode.jsx       # Exhibition / Outreach walkthrough mode
 │   │       ├── Sidebar.jsx            # Main control sidebar
 │   │       ├── Navbar.jsx             # Top header bar
@@ -268,7 +266,7 @@ docker-compose down
 
 ---
 
-## ❓ Troubleshooting & FAQs
+## Troubleshooting & FAQs
 
 ### 1. "503 Service Unavailable: Ocean data cache is warming up"
 - **Cause**: Upon launch, the backend downloads or reads the latest ocean grid from CMEMS / NetCDF files.
@@ -285,4 +283,4 @@ docker-compose down
 
 ---
 
-> ✨ **Developed for SIH 2026 — INCOIS Ocean Data Visualization Challenge**
+**Developed for SIH 2026 — INCOIS Ocean Data Visualization Challenge**

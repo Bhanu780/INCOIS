@@ -6,6 +6,7 @@ import FloatProfilePanel from './components/FloatProfilePanel';
 import ColorLegend from './components/ColorLegend';
 import TimeSlider from './components/TimeSlider';
 import OutreachMode from './components/OutreachMode';
+import { getRegion } from './data/regions';
 import {
   fetchArgoFloats,
   fetchOceanGrid,
@@ -23,6 +24,11 @@ export default function App() {
   const [verticalExaggeration, setVerticalExaggeration] = useState(100);
   const [currentTime, setCurrentTime]       = useState(null);
 
+  // ── Region selector ───────────────────────────────────────────────────
+  const [selectedRegion, setSelectedRegion] = useState('global');
+  const activeRegion = getRegion(selectedRegion);
+  const regionBbox   = activeRegion.bbox ?? null;
+
   // ── Colorbar config (palette, vmin, vmax, scale) ────────────────────
   const [colorbarConfig, setColorbarConfig] = useState({
     palette: 'thermal',
@@ -39,6 +45,9 @@ export default function App() {
     setDepthSlice(preset.depth);
     setRenderMode(preset.renderMode);
     setShowFloats(preset.id === 'argo-floats');
+    if (preset.region) {
+      setSelectedRegion(preset.region);
+    }
     setOutreachOpen(false);
   }, []);
 
@@ -46,7 +55,7 @@ export default function App() {
   const [floats, setFloats] = useState([]);
 
   useEffect(() => {
-    fetchArgoFloats()
+    fetchArgoFloats(30, false, regionBbox)
       .then((data) => {
         console.log('Argo floats loaded:', data?.length || 0, 'floats');
         setFloats(data || []);
@@ -55,13 +64,14 @@ export default function App() {
         console.error('Failed to fetch Argo floats:', err);
         setFloats([]);
       });
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRegion]);
 
   // ── Ocean grid data ───────────────────────────────────────────────────
   const [gridData, setGridData] = useState([]);
 
   useEffect(() => {
-    fetchOceanGrid()
+    fetchOceanGrid(regionBbox)
       .then((data) => {
         console.log('Ocean grid loaded:', data?.length || 0, 'points');
         setGridData(data || []);
@@ -70,7 +80,8 @@ export default function App() {
         console.error('Failed to fetch ocean grid:', err);
         setGridData([]);
       });
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRegion]);
 
   // ── Status ────────────────────────────────────────────────────────────
   const [dataSourceStatus, setDataSourceStatus] = useState(null);
@@ -99,6 +110,7 @@ export default function App() {
         colorbarConfig={colorbarConfig}             onColorbarConfigChange={setColorbarConfig}
         floatCount={floats.length}
         dataSourceStatus={dataSourceStatus}
+        selectedRegion={selectedRegion}             onRegionChange={setSelectedRegion}
       />
 
       <CesiumMap
@@ -114,10 +126,13 @@ export default function App() {
         verticalExaggeration={verticalExaggeration}
         colorbarConfig={colorbarConfig}
         currentTime={currentTime}
+        selectedRegion={selectedRegion}
+        regionCesiumView={activeRegion.cesiumView}
       />
 
       <FloatProfilePanel
         floatId={selectedFloat}
+        variable={variable}
         onClose={() => setSelectedFloat(null)}
       />
 
