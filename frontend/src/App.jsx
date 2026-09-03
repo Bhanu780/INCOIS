@@ -25,7 +25,7 @@ export default function App() {
   const [currentTime, setCurrentTime]       = useState(null);
 
   // ── Region selector ───────────────────────────────────────────────────
-  const [selectedRegion, setSelectedRegion] = useState('global');
+  const [selectedRegion, setSelectedRegion] = useState('arabian-sea');
   const activeRegion = getRegion(selectedRegion);
   const regionBbox   = activeRegion.bbox ?? null;
 

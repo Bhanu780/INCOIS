@@ -7,12 +7,6 @@
  */
 export const REGIONS = [
   {
-    id: 'global',
-    label: 'Global Ocean',
-    bbox: null,
-    cesiumView: { longitude: 0, latitude: 20, height: 25_000_000 },
-  },
-  {
     id: 'arabian-sea',
     label: 'Arabian Sea',
     bbox: { minLon: 50, maxLon: 78, minLat: 5, maxLat: 30 },
