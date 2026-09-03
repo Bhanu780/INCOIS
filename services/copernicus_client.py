@@ -224,20 +224,13 @@ class CopernicusClient:
             return None
 
     def _try_opendap(self) -> Optional[xr.Dataset]:
-        """
-        Fallback: try well-known public OPeNDAP endpoints.
-
-        HYCOM GLBa0.08 is free and requires no auth.
-        INCOIS ROMS endpoints can be added to OPENDAP_URLS env var.
-        """
+        """Try external OPeNDAP endpoint if configured via OPENDAP_URLS."""
         opendap_urls_raw = os.getenv("OPENDAP_URLS", "")
         urls: List[str] = [u.strip() for u in opendap_urls_raw.split(",") if u.strip()]
 
-        # Default public HYCOM endpoint as a fallback
         if not urls:
-            urls = [
-                "https://tds.hycom.org/thredds/dodsC/GLBy0.08/latest",
-            ]
+            logger.info("No OPENDAP_URLS configured — skipping slow remote OPeNDAP check.")
+            return None
 
         for url in urls:
             try:
