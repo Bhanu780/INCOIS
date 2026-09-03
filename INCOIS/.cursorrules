@@ -1,0 +1,85 @@
+#project workflow
+
+When we open the app,Landing Page which will have a public 3D Viewer & Open Demos will be displayed.
+
+Authentication:
+
+1.Researcher / Student   Authentication .
+ Standard Email/Password, Google OAuth, or ORCID / academic email (.edu / .ac.in) login.
+2.INCOIS / Scientist  Authentication .
+Official government email domain (@incois.gov.in, @moes.gov.in)
+
+
+
+
+Researcher / Student workflow:
+
+pre zoomed india map will be displayed with highlighted exclusive economic zone of India with deep blue color  with the moving border of sharp white color .
+
+The bottom up search  pop up will be given at bottom.it will come up upon a  single click on it
+
+Search engine will ask which basin among  three sea basin .
+-Arabian Sea Basin 
+-Bay of Bengal Basin 
+-Andaman Sea Basin 
+
+then particular basin will be zoomed in on the map.Also the basin field will be locked and sticked to the corner of pop up and bottom up popup will go down by default.
+
+After the pop up go down,the special markers which itself consist the name of  sub regions like in arabian basin “Lakshadweep Sea, Gulf of Khambhat, Konkan-Malabar Shelf ” will be rendered on the 3d map .when user do single tap or mouse left click,that sub region will be zoomed in .
+
+Now user can zoom in to the particular part of that sub region or else we can further classify that sub region.The user can tap the bottomUp pop up once .After that immediately the pop up comes up and we will be able to see the selected configuration of basin, sub region sticked at the top starting from the left top side . we will also be able to see the search bar asking for the Tactical Anchors (Ports, Harbors, and Research Stations) .after selecting the popup goes down automatically and zoom in that tactical anchor.
+
+
+Now the story begins.!!
+
+Desgin of under water view which user can see in the 3d map from surface
+
+1. NEARSHORE PLUME ZONE (Shallow & Muddy)  
+  In the first 50 kilometers from the beach.The water will  shallow similar to the swimming pool depths down to a regular building height .   It looks like a muddy or bright green because rivers dump freshwater and soil here. So 3D Map View at this area must be a flat, thin, horizontal green ribbon hugging the coast.  then dramatic "drop-off" point. The ocean floor  suddenly quits being a flat beach and drops off like an underwater mountain cliff.  So 3D Map View must be  the exact edge where  map's floor suddenly plunges downward. 
+
+2. CONTINENTAL SLOPE PROVINCE (The Deep Drop) 
+  it looks like   the massive, steep underwater wall going down  thousands of meters. In the middle of this dark wall will have a invisible,  choking cloud of water with absolutely zero oxygen (The Oxygen Minimum Zone). So 3D Map View must be  a massive, sloping block of blue or purple data clinging to  the steep wall. 
+
+3. DEEP ABYSSAL PLAIN (The Dark Bottom)  
+ It is  the true, pitch-black floor of the open ocean. It is flat, freezing cold, and miles below the surface. So we can show free-floating Argo floats like a tiny spaceships. so  3D Map View must be  a massive, thick and dark.
+
+
+
+
+Now its time to place our different types of stationary and dynamic devices on the map …..!
+
+Stationary devices:
+
+1. Automated Tide Gauges:
+ These are the digital sensors bolted directly to concrete piers inside ports (like  Kochi, or Mumbai). They stay 100 percent stationary.  they give  a single value like Water Height in meters which  changes every few minutes as the tide moves in and out.so we cannot  draw a grid circle around it or interpolate it across the ocean.  The Technique we need to use is make a  permanent 3D landmark Pin. we need to place a permanent marker pin exactly at the harbor's GPS coordinate in the map.what we will do means  when a researcher clicks the pin, open a simple 2D line graph showing the tide rising and falling over a 24-hour timeline.
+
+2. HF-Radar Antennas
+ these are the  giant antenna arrays installed on beaches at tactical anchor sites. They are 100 percent  stationary.  they      scan the sea surface up to 200 km out and provide a continuous 2D grid map of surface water currents (speed and direction).so we can’t make up a circular grid or guess values. The radar already us  a highly accurate, pre-calculated mathematical grid matrix.  The Technique to  we must use is 2D Texture Overlay. We should  treat the HF-Radar data like a flat decal sticker. In map, we must put this 2D data matrix directly over the ocean surface in front of the antenna. We must  Use WebGL to draw tiny, animated moving arrows (particles) that show exactly which way the surface water is swirling in real-time.
+
+3.OMNI Moored Buoys
+ these are massive, heavy buoys anchored to the seafloor in deep waters (like the middle of the Arabian Sea). They stay  100 percent stationary, floating within a tiny radius. They have a long cable hanging straight down into the water up to 500 meters deep. This cable has sensors attached at specific depth gaps like at 1m, 10m, 20m, 50m, 100m, 500m.They measure temperature and salinity. The Technique to Use is  Vertical String Raycasting. Map the buoy as a permanent 3D pin in the open ocean. When the user tilts the map to view the vertical layers, draw a glowing vertical line hanging straight down from the buoy to the seafloor.we should  map the temperature values as distinct color nodes along that vertical string like Red at the top, fading to dark blue at the bottom.
+
+4. Autonomous Gliders:
+  these are a  Battery-powered underwater robotic vehicles that travel across the ocean. They are constantly moving.  Every few hours, the glider surfaces, connects to a satellite, and transmits its exact current GPS coordinate along with a continuous dataset of its entire underwater zigzag dive path (Temperature, Salinity, Depth).we should  not  Assume its position is unknown or place it in a static grid. It gives you its exact path. The Technique to Use is 3D Flight Path Ribbon (Spline).we should Download the glider’s recent coordinate history from the backend. In our 3D map, we should draw a continuous, glowing 3D zigzag line (a spline) cutting down through the water column. We should Color-code the ribbon based on what the glider saw like if it hit a low-oxygen zone, that segment of the 3D zigzag line  should glow bright orange
+
+5. Free-Drifting Argo Floats 
+these are Autonomous cylinders that drift completely free with deep ocean currents. They have no steering wheel. Every 10 days, the float sinks down to 2,000 meters, drifts, and then rises to the surface, measuring a clean vertical profile line of the water column. When it pops up at the surface, it gives its exact GPS coordinate and its vertical data to INCOIS.so we should not  Lock it to a specific radius or cluster grid. An Argo float tracking block can drift hundreds of kilometers away over a few months.  The Technique to Use is Moving Spatial Point Cloud + Dropdown Chart.we should  Render each active Argo float as a floating, interactive sphere pin at its last known satellite GPS location. When a user runs a "Radius Search" around a sub-grid or town, your app checks which of these free-floating spheres are currently inside that circle and highlights them. Clicking a sphere pulls up a clean, depth-vs-temperature profile chart in a split screen.
+
+
+
+  now its time to plan under water view…….!
+
+We will give the toggle button which we toggle the above water mode and under water mode.when a user toggle the switch to the under water mode  at specific location,that time the graphics loads and will render the three layered under water  3d grid .
+
+ Top layer also known as  The Epipelagic Zone basically 0 to 200 meters deep.
+ It is the  sunlit part of the water. It is warm, full of fish, and glowing green  with plant life (Chlorophyll). So in 3D Map Clicking this hides the deep water, showing only the bright surface currents.
+ 
+Middle layer also known as  the Mesopelagic Zone basically 200 to 1,000 meters deep
+ It is  The "Twilight Zone." Sunlight fades away from its top to bottom. This is where  the water temperature crashes and that term is known as thermocline and oxygen disappears.
+In 3D Map   Clicking this slices off the top 200m of the ocean so the user can look  directly into the hidden internal choking zone.
+
+Bottom layer also known as   Bathypelagic Zone (1,000 meters down to the Seafloor).it is absolute darkness, massive crushing pressure, and freezing water. In 3D Map  upon clicking this ,the camera dives deep beneath the earth's crust level to look at the deep-sea data blocks resting on the abyssal plain as i explained above.
+
+
+
+now i am just focusing on the mvp so dont need to implement every thing
