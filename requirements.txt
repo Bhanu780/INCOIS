@@ -1,8 +1,11 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
 httpx
 xarray
 netCDF4
 numpy
 copernicusmarine
+pydantic>=2.0
+scikit-image
+pandas
