@@ -13,9 +13,9 @@ export default function Navbar({ onOutreachClick }) {
           </svg>
         </div>
 
-        <h1 className="text-lg font-semibold tracking-wide">
-          <span className="text-accent-cyan">Apna Sagar</span>{' '}
-          <span className="text-ocean-200">3D Ocean Visualizer</span>
+        <h1 className="flex min-w-0 items-baseline gap-2 text-lg font-semibold tracking-wide">
+          <span className="shrink-0 text-accent-cyan">Apna Sagar</span>
+          <span className="truncate text-sm font-medium text-ocean-200 sm:text-base">Indian Ocean Explorer</span>
         </h1>
       </div>
 

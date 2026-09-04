@@ -17,7 +17,8 @@
     "recharts": "^3.10.1",
     "resium": "^1.25.0",
     "tailwindcss": "^4.3.3",
-    "vite-plugin-cesium": "^1.2.23"
+    "vite-plugin-cesium": "^1.2.23",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

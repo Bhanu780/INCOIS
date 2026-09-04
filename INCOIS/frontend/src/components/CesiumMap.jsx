@@ -1,6 +1,12 @@
 import { useEffect, useRef, useMemo } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
+import useMapStore from '../stores/useMapStore';
+import { loadIndiaEezLayer } from '../utils/indiaEezLayer';
+import { syncTacticalAnchors, pickTacticalAnchor } from '../utils/tacticalAnchorLayer';
+import { syncSubRegionGeofence } from '../utils/subRegionGeofenceLayer';
+import { getSubRegionBorder } from '../data/maritimeSubRegions';
+import { getBasin } from '../data/indiaBasins';
 
 // Use Cesium Ion access token
 Cesium.Ion.defaultAccessToken =
@@ -55,7 +61,7 @@ function variableToColor(val, variable, alpha = 0.3) {
   return new Cesium.Color(r / 255, g / 255, b / 255, alpha);
 }
 
-function getVariableValue(pt, variable, currentTime) {
+function getVariableValue(pt, variable) {
   let val;
   let unit = '°C';
 
@@ -68,14 +74,6 @@ function getVariableValue(pt, variable, currentTime) {
   } else {
     val = pt.temp;
     unit = '°C';
-  }
-
-  // Apply subtle time-phase modulation for smooth time-series animation
-  if (val !== null && val !== undefined && !Number.isNaN(val) && currentTime) {
-    const tMs = typeof currentTime === 'number' ? currentTime : new Date(currentTime).getTime();
-    const hours = tMs / (1000 * 3600);
-    const phaseShift = Math.sin(pt.lat * 0.3 + pt.lon * 0.4 + hours * 0.5) * 0.8;
-    val = Math.round((val + phaseShift) * 100) / 100;
   }
 
   return { val, unit };
@@ -93,12 +91,33 @@ export default function CesiumMap({
   verticalExaggeration = 100,
   renderMode = 'volumetric',
   colorbarConfig,
-  currentTime,
-  selectedRegion,
-  regionCesiumView,
 }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
+
+  const selectedBasin = useMapStore((s) => s.selectedBasin);
+  const selectedSubRegion = useMapStore((s) => s.selectedSubRegion);
+  const selectedAnchor = useMapStore((s) => s.selectedAnchor);
+  const selectAnchor = useMapStore((s) => s.selectAnchor);
+  const getActiveCesiumView = useMapStore((s) => s.getActiveCesiumView);
+  const getVisibleAnchors = useMapStore((s) => s.getVisibleAnchors);
+
+  const regionKey = `${selectedBasin ?? 'india'}-${selectedSubRegion ?? 'all'}-${selectedAnchor ?? 'none'}`;
+  const regionCesiumView = useMemo(
+    () => getActiveCesiumView(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [regionKey],
+  );
+  const visibleAnchors = getVisibleAnchors();
+
+  const subRegionBorder = useMemo(() => {
+    if (!selectedBasin || !selectedSubRegion) return null;
+    return getSubRegionBorder(selectedBasin, selectedSubRegion);
+  }, [selectedBasin, selectedSubRegion]);
+
+  const subRegionNeonColor = useMemo(() => {
+    return getBasin(selectedBasin)?.neonColor ?? '#22d3ee';
+  }, [selectedBasin]);
 
   // ── Initialise Cesium Viewer (once) ──────────────────────────────
   useEffect(() => {
@@ -121,8 +140,13 @@ export default function CesiumMap({
     viewer.scene.globe.enableLighting = true;
     viewer.scene.skyAtmosphere.brightnessShift = -0.2;
 
+    const indiaView = useMapStore.getState().getActiveCesiumView();
     viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(75, 12, 3_800_000),
+      destination: Cesium.Cartesian3.fromDegrees(
+        indiaView.longitude,
+        indiaView.latitude,
+        indiaView.height,
+      ),
       orientation: {
         heading: Cesium.Math.toRadians(0),
         pitch: Cesium.Math.toRadians(-90),
@@ -132,7 +156,15 @@ export default function CesiumMap({
 
     viewerRef.current = viewer;
 
+    let removeEezLayer = null;
+    loadIndiaEezLayer(viewer, { fillOpacity: 0.48 })
+      .then((cleanup) => {
+        removeEezLayer = cleanup;
+      })
+      .catch((err) => console.error('Failed to load India EEZ KML:', err));
+
     return () => {
+      removeEezLayer?.();
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {
         viewerRef.current.destroy();
         viewerRef.current = null;
@@ -153,14 +185,31 @@ export default function CesiumMap({
         pitch:   Cesium.Math.toRadians(-90),
         roll:    0,
       },
-      duration: 2.0,
+      duration: selectedAnchor ? 1.6 : 2.0,
     });
-  // We intentionally omit regionCesiumView from deps to avoid flying on every render;
-  // selectedRegion is the stable trigger.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRegion]);
+  }, [regionKey]);
 
-  // ── Click handler for float markers ──────────────────────────────
+  // ── Sub-region geofence polygon ─────────────────────────────────────
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    syncSubRegionGeofence(viewer, subRegionBorder, {
+      fillColor: subRegionNeonColor,
+      visible: Boolean(subRegionBorder),
+    });
+  }, [subRegionBorder, subRegionNeonColor]);
+
+  // ── Tactical anchor markers ───────────────────────────────────────
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    syncTacticalAnchors(viewer, visibleAnchors, selectedAnchor, selectAnchor);
+  }, [visibleAnchors, selectedAnchor, selectAnchor]);
+
+  // ── Click handler for floats + tactical anchors ───────────────────
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
@@ -169,13 +218,21 @@ export default function CesiumMap({
 
     handler.setInputAction((click) => {
       const picked = viewer.scene.pick(click.position);
-      if (Cesium.defined(picked) && picked.id && picked.id._isArgoFloat) {
+      if (!Cesium.defined(picked) || !picked.id) return;
+
+      const anchorId = pickTacticalAnchor(picked);
+      if (anchorId) {
+        selectAnchor(anchorId);
+        return;
+      }
+
+      if (picked.id._isArgoFloat) {
         onFloatClick?.(picked.id.name);
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
     return () => handler.destroy();
-  }, [onFloatClick]);
+  }, [onFloatClick, selectAnchor]);
 
   // ── Sync Argo-float entities with props ──────────────────────────
   useEffect(() => {
@@ -306,7 +363,7 @@ export default function CesiumMap({
       // 1) Render every grid point as a 3D coloured point
       gridData.forEach((pt) => {
         const altitude = pt.depth * VE;
-        const { val, unit } = getVariableValue(pt, variable, currentTime);
+        const { val, unit } = getVariableValue(pt, variable);
         const isHighlighted = pt.depth === highlightDepth;
         const pointAlpha = isHighlighted ? Math.min(1, alpha + 0.25) : alpha * 0.6;
         // Grey out points with missing data
@@ -424,7 +481,7 @@ export default function CesiumMap({
         const south = pt.lat - HALF;
         const north = pt.lat + HALF;
 
-        const { val, unit } = getVariableValue(pt, variable, currentTime);
+        const { val, unit } = getVariableValue(pt, variable);
         const hasData = val !== null && val !== undefined && !Number.isNaN(val);
         const color = hasData
           ? variableToColor(val, variable, sliceAlpha)
@@ -452,7 +509,6 @@ export default function CesiumMap({
   }, [
     gridData, filteredGrid, columnGroups, gridBounds, allDepths, highlightDepth,
     variable, showGrid, gridOpacity, renderMode, verticalExaggeration, depthSlice,
-    currentTime,
   ]);
 
   return (

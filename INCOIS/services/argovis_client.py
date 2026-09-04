@@ -63,11 +63,12 @@ class ArgovisClient:
         # Build a hashable cache key from the bbox
         if bbox:
             cache_key = (
+                days_back,
                 round(bbox["min_lon"], 4), round(bbox["max_lon"], 4),
                 round(bbox["min_lat"], 4), round(bbox["max_lat"], 4),
             )
         else:
-            cache_key = "global"
+            cache_key = ("global", days_back)
 
         # Return cached result if still fresh
         cached = self._region_cache.get(cache_key)
@@ -150,7 +151,7 @@ class ArgovisClient:
             # Fallback generator if Argovis API returned 0 floats (e.g. rate limit, offline API, no key)
             if not floats:
                 logger.info("Argovis returned 0 floats — generating realistic fallback regional float dataset")
-                floats = self._generate_fallback_floats(bbox)
+                floats = self._generate_fallback_floats(bbox, count=24)
 
             # Only cache non-empty float lists
             if floats:
@@ -176,7 +177,7 @@ class ArgovisClient:
             self._data_source = "fallback"
             return fallback
 
-    def _generate_fallback_floats(self, bbox: Optional[Dict[str, float]] = None) -> List[Dict[str, Any]]:
+    def _generate_fallback_floats(self, bbox: Optional[Dict[str, float]] = None, count: int = 14) -> List[Dict[str, Any]]:
         """Generate deterministic, realistic Argo float markers within a bounding box."""
         import random
         rnd = random.Random(42) # Fixed seed for stable float IDs
@@ -189,7 +190,6 @@ class ArgovisClient:
             # Handle antimeridian crossing
             if min_lon > max_lon:
                 max_lon += 360
-            count = 14
         else:
             min_lon, max_lon, min_lat, max_lat = -160, 160, -50, 60
             count = 35
@@ -198,8 +198,8 @@ class ArgovisClient:
         for i in range(count):
             plat_id = 2900000 + (i * 137) % 90000
             float_id = f"AF-{plat_id}"
-            lat = min_lat + (max_lat - min_lat) * ((i * 0.7 + 0.15) % 1.0)
-            lon = min_lon + (max_lon - min_lon) * ((i * 0.4 + 0.1) % 1.0)
+            lat = rnd.uniform(min_lat, max_lat)
+            lon = rnd.uniform(min_lon, max_lon if min_lon <= max_lon else max_lon)
             if lon > 180:
                 lon -= 360
             result.append({

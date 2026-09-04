@@ -59,14 +59,19 @@ async def get_float_profile(float_id: str):
     given float ID.  Data sourced from Argovis in real-time (Req 3).
     """
     logger.info(f"Fetching profile for float: {float_id}")
-    floats = await _argovis.fetch_active_floats()
+    # The map uses a wider observation window for geofenced regions. Use the
+    # same window here so a visible float can always open its profile.
+    floats = await _argovis.fetch_active_floats(days_back=180)
     match = next((f for f in floats if f["id"] == float_id), None)
-    if not match:
+    profile_id = match["last_profile_id"] if match else None
+    if not profile_id and float_id.startswith("AF-"):
+        profile_id = float_id[3:]
+    if not profile_id:
         logger.warning(f"Float '{float_id}' not found in active floats")
         raise HTTPException(status_code=404, detail=f"Float '{float_id}' not found")
 
-    logger.debug(f"Found float {float_id}, fetching profile {match['last_profile_id']}")
-    profile = await _argovis.fetch_profile(match["last_profile_id"])
+    logger.debug(f"Found float {float_id}, fetching profile {profile_id}")
+    profile = await _argovis.fetch_profile(profile_id)
     if profile is None:
         logger.error(f"Profile data unavailable for float {float_id}")
         raise HTTPException(
